@@ -1,3 +1,3 @@
 # download-manager
 
-Upload multiples files to s3 at the same time
+Download and upload multiples files to s3 at the same time
