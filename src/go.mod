@@ -1,3 +1,3 @@
-module download_manager/download
+module download-manager/download
 
 go 1.18
