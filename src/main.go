@@ -1,18 +1,22 @@
 package main
 
 import (
+	"github.com/gin-gonic/gin"
+	"download-manager/controller"
 	"download-manager/config"
-	"download-manager/utils"
+	"download-manager/model"
 )
-
-
 
 
 func main() {
 	config.LoadEnv() // load the enviroment
 
-	m := map[string]string{
-   "business-financial-data-december-2021-quarter-csv.zip": "https://www.stats.govt.nz/assets/Uploads/Business-financial-data/Business-financial-data-December-2021-quarter/Download-data/business-financial-data-december-2021-quarter-csv.zip"}
+	r := gin.Default()
 
-	utils.DownloadFiles(m)
+	model.ConnectDatabase()
+
+	r.GET("/get-files-info", controller.GetFilesInfo)
+	r.POST("/download-file", controller.DownloadFile)
+	r.POST("/download-files", controller.DownloadFiles)
+	r.Run()
 }
