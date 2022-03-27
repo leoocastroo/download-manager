@@ -35,7 +35,7 @@ func connectAWS() *session.Session {
 	return sess
 }
 
-func UploadToS3(file io.Reader, filename string)  {
+func uploadToS3(file io.Reader, filename string)  {
   sess := connectAWS()
   uploader := s3manager.NewUploader(sess)
 
