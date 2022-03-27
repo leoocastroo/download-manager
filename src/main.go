@@ -1,17 +1,15 @@
 package main
 
 import (
-	"io"
 	"net/http"
-	"os"
 	"sync"
+
+	"download-manager/config"
+	"download-manager/utils"
 )
 
 
-func downloadFile(link string, outputPath string, wg *sync.WaitGroup)  {
-	out, _ := os.Create(outputPath) // Create a file
-	defer out.Close() // Close the file (defer is telling us to close at te end of the function)
-
+func downloadFile(link string, filename string, wg *sync.WaitGroup)  {
 	resp, err := http.Get(link) // Get request
 
 	if err != nil {
@@ -21,23 +19,22 @@ func downloadFile(link string, outputPath string, wg *sync.WaitGroup)  {
 
 	defer resp.Body.Close() // Close request
 
-	io.Copy(out, resp.Body) // Save the file with request content
+	utils.UploadToS3(resp.Body, filename)
 
 	wg.Done() // decrement counter for goroutines
 }
 
 func main() {
+	config.LoadEnv() // load the enviroment
+
 	m := map[string]string{
-		"/Users/leonardocastro/Projects/go/Download File/download/output_1.csv":"https://www.portaltransparencia.gov.br/beneficios/consulta/baixar?paginacaoSimples=true&direcaoOrdenacao=asc&de=01%2F02%2F2022&ate=28%2F02%2F2022&colunasSelecionadas=linkDetalhamento%2ClinguagemCidada%2CmesAno%2Cuf%2Cmunicipio%2Cvalor",
-		"/Users/leonardocastro/Projects/go/Download File/download/output_2.csv":"https://www.portaltransparencia.gov.br/beneficios/consulta/baixar?paginacaoSimples=true&direcaoOrdenacao=asc&de=01%2F02%2F2022&ate=28%2F02%2F2022&colunasSelecionadas=linkDetalhamento%2ClinguagemCidada%2CmesAno%2Cuf%2Cmunicipio%2Cvalor",
-		"/Users/leonardocastro/Projects/go/Download File/download/output_3.csv":"https://www.portaltransparencia.gov.br/beneficios/consulta/baixar?paginacaoSimples=true&direcaoOrdenacao=asc&de=01%2F02%2F2022&ate=28%2F02%2F2022&colunasSelecionadas=linkDetalhamento%2ClinguagemCidada%2CmesAno%2Cuf%2Cmunicipio%2Cvalor",
-		"/Users/leonardocastro/Projects/go/Download File/download/output_4.csv":"https://www.portaltransparencia.gov.br/beneficios/consulta/baixar?paginacaoSimples=true&direcaoOrdenacao=asc&de=01%2F02%2F2022&ate=28%2F02%2F2022&colunasSelecionadas=linkDetalhamento%2ClinguagemCidada%2CmesAno%2Cuf%2Cmunicipio%2Cvalor"}
+		"annual-enterprise-survey-2020-financial-year-provisional-csv.csv":"https://www.stats.govt.nz/assets/Uploads/Annual-enterprise-survey/Annual-enterprise-survey-2020-financial-year-provisional/Download-data/annual-enterprise-survey-2020-financial-year-provisional-csv.csv"}
 
 	// This WaitGroup is used to wait for all the goroutines launched here to finish
 	var wg sync.WaitGroup
-	for k, v := range m {
+	for filename, link := range m {
 		wg.Add(1) // incrment counter for goroutines
-		go downloadFile(v, k, &wg)
+		go downloadFile(link, filename, &wg)
 	}
 	wg.Wait()  // Main Goroutine will wait till incremnet counter is zero
 }
